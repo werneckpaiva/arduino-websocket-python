@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css" rel="stylesheet" type="text/css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.4/socket.io.min.js" type="text/javascript"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.7/bootstrap-slider.min.js"></script>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.7/css/bootstrap-slider.min.css" rel="stylesheet" type="text/css">
+
+    <title>Led control</title>
+    <style>
+        .ledSlider{
+            width: 600px;
+        }
+        .row{
+            height: 60px;
+        }
+    </style>
+    <script type="text/javascript">
+
+        var socket = null;
+        var ledValues = [100, 100, 100, 100];
+        function sendValues(){
+            socket.emit('led_change', {leds: ledValues});
+        }
+        function handleSlide(evt){
+            var led = $(evt.target).data("led");
+            ledValues[led] = evt.value;
+            sendValues();
+        }
+        $(function() {
+            socket = io.connect(document.domain + ':' + location.port);
+            socket.on('firstValues', function(values) {
+                console.log(values);
+                for(var i=0; i<4; i++){
+                    $("#led"+i).slider("setValue", values[i], true, false);
+                }
+                ledValues = values;
+            });
+            $("#led0").slider().on("slideStop", handleSlide);
+            $("#led1").slider().on("slideStop", handleSlide);
+            $("#led2").slider().on("slideStop", handleSlide);
+            $("#led3").slider().on("slideStop", handleSlide);
+        });
+    </script>
+
+  </head>
+  <body>
+    <div class="container">
+        <h2>Distância</h2>
+        <!-- <button id="btnSend">Clique</button> -->
+        {% for i in range(4) %}
+        <div class="row">
+            <input id="led{{ i }}" type="text" class="ledSlider"
+                data-led="{{ i }}"
+                data-slider-min="0" data-slider-max="400" data-slider-step="20"
+                data-slider-value="100"
+                tooltip: 'always'/>
+        </div>
+        {% endfor %}
+        <!-- <input id="led0" data-slider-id='led0Slider' type="text"
+            data-slider-min="10" data-slider-max="300"
+            data-slider-step="10" data-slider-value="100"/> -->
+    </div>
+</body>
+</html>

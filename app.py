@@ -33,6 +33,7 @@ def handle_led_change(obj):
     values=','.join([str(n) for n in obj['leds']])
     print "changes: %s" % values
     arduinoSerial.write(values+ ',')
+    emit('firstValues', lastValues, broadcast=True)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
